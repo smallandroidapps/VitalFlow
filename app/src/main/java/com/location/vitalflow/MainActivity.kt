@@ -73,13 +73,21 @@ class MainActivity : ComponentActivity() {
                                     label = { Text(screen.label) },
                                     selected = isSelected,
                                     onClick = {
-                                        navController.navigate(screen.route) {
-                                            // Pop everything to start destination to avoid stack accumulation
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
+                                        val isWaterTab = screen == Screen.Water
+                                        val isCurrentlyOnWaterRoute = currentDestination?.hierarchy?.any { it.route == screen.route } == true
+                                        val isCurrentlyOnWaterHistory = currentDestination?.route == "water_history"
+
+                                        if (isWaterTab && (isCurrentlyOnWaterRoute || isCurrentlyOnWaterHistory)) {
+                                            // Force return to main water wave animation
+                                            navController.popBackStack(Screen.Water.route, inclusive = false)
+                                        } else {
+                                            navController.navigate(screen.route) {
+                                                popUpTo(navController.graph.findStartDestination().id) {
+                                                    saveState = true
+                                                }
+                                                launchSingleTop = true
+                                                restoreState = true
                                             }
-                                            launchSingleTop = true
-                                            restoreState = true
                                         }
                                     }
                                 )
