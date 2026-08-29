@@ -73,13 +73,17 @@ class MainActivity : ComponentActivity() {
                                     label = { Text(screen.label) },
                                     selected = isSelected,
                                     onClick = {
-                                        navController.navigate(screen.route) {
-                                            // Pop everything to start destination to avoid stack accumulation
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
+                                        if (currentDestination?.route != screen.route) {
+                                            navController.navigate(screen.route) {
+                                                popUpTo(navController.graph.findStartDestination().id) {
+                                                    saveState = true
+                                                }
+                                                launchSingleTop = true
+                                                restoreState = true
                                             }
-                                            launchSingleTop = true
-                                            restoreState = true
+                                        } else if (screen == Screen.Water && currentDestination?.route == "water_history") {
+                                            // Special case: if we are in water history and click Water tab, go back to main water UI
+                                            navController.popBackStack(Screen.Water.route, inclusive = false)
                                         }
                                     }
                                 )
