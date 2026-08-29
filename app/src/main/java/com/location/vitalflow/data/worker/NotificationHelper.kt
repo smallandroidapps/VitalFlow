@@ -15,6 +15,7 @@ class NotificationHelper(private val context: Context) {
         const val WATER_CHANNEL_ID = "water_reminders"
         const val MEAL_CHANNEL_ID = "meal_reminders"
         const val WATER_NOTIFICATION_ID = 101
+        const val MEAL_NOTIFICATION_ID = 200
     }
 
     init {
@@ -86,6 +87,31 @@ class NotificationHelper(private val context: Context) {
             context, 0, intent, PendingIntent.FLAG_IMMUTABLE
         )
 
+        // Quick Actions
+        val ateIntent = Intent(context, MealActionReceiver::class.java).apply {
+            action = "ACTION_ATE"
+            putExtra("MEAL_TYPE", mealType)
+        }
+        val atePendingIntent = PendingIntent.getBroadcast(
+            context, 3, ateIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val skipIntent = Intent(context, MealActionReceiver::class.java).apply {
+            action = "ACTION_SKIP"
+            putExtra("MEAL_TYPE", mealType)
+        }
+        val skipPendingIntent = PendingIntent.getBroadcast(
+            context, 4, skipIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val snoozeIntent = Intent(context, MealActionReceiver::class.java).apply {
+            action = "ACTION_SNOOZE"
+            putExtra("MEAL_TYPE", mealType)
+        }
+        val snoozePendingIntent = PendingIntent.getBroadcast(
+            context, 5, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val builder = NotificationCompat.Builder(context, MEAL_CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_menu_set_as)
             .setContentTitle("Meal Time: $mealType")
@@ -93,8 +119,11 @@ class NotificationHelper(private val context: Context) {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
+            .addAction(0, "Ate", atePendingIntent)
+            .addAction(0, "Skip", skipPendingIntent)
+            .addAction(0, "Snooze 15m", snoozePendingIntent)
 
         val manager = context.getSystemService(NotificationManager::class.java)
-        manager.notify(200, builder.build())
+        manager.notify(MEAL_NOTIFICATION_ID, builder.build())
     }
 }
